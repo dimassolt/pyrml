@@ -1422,7 +1422,21 @@ class TripleMappings(AbstractMap):
                                     df_join = None
                                     if isinstance(object_map, ReferencingObjectMap) and object_map.join_conditions:
                                         df_left = df.copy()
-                                        df_left['__pyrml_sbj_representation__'] = sbj_representation
+                                        #df_left['__pyrml_sbj_representation__'] = sbj_representation
+                                        # Ensure sbj_representation is a pandas Series
+                                        sbj_series = pd.Series(sbj_representation)
+                                        
+                                        # If the lengths don't match, truncate or pad the subject representation
+                                        if len(sbj_series) != len(df_left):
+                                            print(f"⚠️ Length mismatch: subjects = {len(sbj_series)}, df = {len(df_left)}")
+                                        
+                                            # Option 1: truncate to match length (safe if you expect extra values)
+                                            sbj_series = sbj_series[:len(df_left)]
+                                        
+                                            # Option 2: OR reindex with NaNs if necessary (comment out above line to use this)
+                                            # sbj_series = sbj_series.reindex(range(len(df_left)), fill_value=pd.NA)
+                                        
+                                        df_left['__pyrml_sbj_representation__'] = sbj_series.values
                                         
                                         parent_triple_mappings = object_map.parent_triples_maps
                                         
